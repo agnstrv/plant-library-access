@@ -1,0 +1,75 @@
+name: Library access
+on:
+  issues:
+    types: [labeled]
+  push:
+    branches: ['work/**', main]
+  pull_request:
+  workflow_dispatch:
+permissions: {}
+concurrency:
+  group: library-access-${{ github.event.issue.number || github.run_id }}
+  cancel-in-progress: false
+jobs:
+  tests:
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - run: node --test tests/invite.test.mjs
+  invite:
+    if: >-
+      github.event_name == 'issues' &&
+      github.repository_id == '1461140644' &&
+      github.actor_id == '148447292' &&
+      github.triggering_actor == 'agnstrv' &&
+      github.event.sender.id == 148447292 &&
+      github.event.label.name == 'access-approved' &&
+      github.event.issue.state == 'open' &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Check owner approval and invite issue author
+        env:
+          PORTAL_TOKEN: ${{ github.token }}
+          LIBRARY_INVITE_TOKEN: ${{ secrets.LIBRARY_INVITE_TOKEN }}
+        run: node scripts/invite.mjs
+  check-configuration:
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      github.repository_id == '1461140644' &&
+      github.actor_id == '148447292' &&
+      github.triggering_actor == 'agnstrv'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+      - name: Check private library connection without inviting anyone
+        env:
+          LIBRARY_INVITE_TOKEN: ${{ secrets.LIBRARY_INVITE_TOKEN }}
+        run: node scripts/invite.mjs --check
