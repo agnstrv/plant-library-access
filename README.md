@@ -32,7 +32,7 @@
 
 Автоматическая выдача требует отдельного fine-grained personal access token владельца. Обычный GITHUB_TOKEN видит только репозиторий заявок и не может приглашать в другую закрытую библиотеку.
 
-1. [Создайте fine-grained token](https://github.com/settings/personal-access-tokens/new): Resource owner `agnstrv`, Repository access → Only select repositories → **plant-texture-library**.
+1. [Создайте fine-grained token](https://github.com/settings/personal-access-tokens/new?name=plant-library-invitations&target_name=agnstrv&expires_in=90&administration=write): Resource owner `agnstrv`, Repository access → Only select repositories → **plant-texture-library**.
 2. Repository permissions → **Administration: Read and write**. Остальные дополнительные права не нужны; Metadata добавляется GitHub автоматически. Назовите ключ `plant-library-invitations` и выберите ограниченный срок действия, например 90 дней.
 3. В [Actions Secrets этого репозитория](https://github.com/agnstrv/plant-library-access/settings/secrets/actions/new) сохраните его как **LIBRARY_INVITE_TOKEN**. В код, issue и чат ключ не вставляйте.
 4. В [Actions → Library access](https://github.com/agnstrv/plant-library-access/actions/workflows/library-access.yml) нажмите Run workflow. Это проверяет подключение к закрытой библиотеке, никого не приглашая. Успешная проверка доступности репозитория ещё не заменяет первую реальную проверку приглашения.
